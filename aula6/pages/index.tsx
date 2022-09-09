@@ -13,27 +13,47 @@ const Home: NextPage = () => {
     return(
       <Grid  container direction="column" xs={15}>
 
-          <Grid item xs={1.5}>        
-            <TextField id="outlined-basic" label="CEP" variant="outlined" fullWidth /> 
-            <IconButton>
-              <SearchIcon />
-            </IconButton>
-          </Grid>      
+        <Grid item paddingTop={1} paddingBottom={1}>
+          <TextField
+            fullWidth
+            id="txt_cep"
+            label="CEP"
+            variant="outlined"
 
-          <Grid item xs={1.5}>  
-            <TextField id="txt_uf" label="UF" variant="outlined" fullWidth/>  
+            InputProps={{
+             endAdornment: 
+              <IconButton sx={{bgcolor: '#1C5B75', borderRadius: '5px'}}
+              onClick={()=>{
+
+               }}>
+               <SearchIcon sx={{color: 'white'}}/>
+             </IconButton>
+           }}
+          />
+        </Grid>      
+
+          <Grid item xs={1.5} paddingBottom={1}> 
+            <TextField id="txt_uf" label="UF" variant="outlined"/>  
           </Grid>
 
-          <Grid item xs={1.5}> 
-            <TextField id="outlined-basic" label="BAIRRO" variant="outlined" fullWidth/>
+          <Grid item xs={8} paddingBottom={1}> 
+            <TextField id="txt_cidade" label="CIDADE" variant="outlined"/>
+          </Grid>          
+
+          <Grid paddingBottom={1}>
+            <TextField id="txt_bairro" label="BAIRRO" variant="outlined" fullWidth/>
           </Grid>
 
-          <Grid item xs={1.5}> 
-            <TextField id="outlined-basic" label="LOGRADOURO" variant="outlined" fullWidth/>
+          <Grid paddingBottom={1}>
+            <TextField id="txt_logradouro" label="LOGRADOURO" variant="outlined"/>
+          </Grid>
+
+          <Grid paddingBottom={1}>
+            <TextField id="txt_numero" label="NUMERO" variant="outlined" fullWidth/>
           </Grid>
           
-          <Grid item xs={1.5}> 
-            <TextField id="outlined-basic" label="COMPLEMENTO" variant="outlined" fullWidth/>
+          <Grid paddingBottom={1}>
+            <TextField id="txt_complemento" label="COMPLEMENTO" variant="outlined" fullWidth/>
           </Grid>
       </Grid>    
     );
@@ -62,7 +82,7 @@ const Home: NextPage = () => {
 
       {addresInput()}
 
-      <Grid container direction="column" xs={2}  alignItems="center">
+      <Grid container direction="column" alignItems="center">
         <Button variant="contained" size ="small">
           INCLUIR
         </Button>
