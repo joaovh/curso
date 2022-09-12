@@ -1,169 +1,194 @@
-import { Box, Button, Divider, Grid, IconButton, TextField } from '@mui/material'
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import { Box, Button, Divider, FormControl, IconButton, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import type { NextPage } from 'next';
 import SearchIcon from '@mui/icons-material/Search';
-import InputBase from '@mui/material/InputBase';
-import * as React from 'react';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
-
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { DataGrid, GridActionsCellItem, GridColumns, GridRenderCellParams, GridRowParams } from '@mui/x-data-grid';
+import React from 'react';
+import { ICepSearchResult } from '../src/types/cep';
+import { BuscaCep } from '../src/api/cep';
+import Lottie from "lottie-react";
+import lottieLoading from "../src/lottie/searching.json";
 
 const Home: NextPage = () => {
+  const [ addressList, setAddressList] = React.useState<ICepSearchResult[]>([]);
+  const [ cep, setCep] = React.useState<string>('');
+  const [ awaiting, setAwaiting] = React.useState<boolean>(false);
 
-  const rows = [
-    { id: 1, CEP: 'cep', UF: 'uf', CIDADE: 'cidade', ENDEREÇO: 'endereco'},
-    { id: 2, CEP: '14781-115', UF: 'SP', CIDADE: 'Barretos', ENDEREÇO: 'endereco+numero+complemento'},
-    { id: 3, CEP: '14781-115', UF: 'SP', CIDADE: 'Barretos', ENDEREÇO: 'endereco+numero+complemento'},
-    { id: 4, CEP: '14781-115', UF: 'SP', CIDADE: 'Barretos', ENDEREÇO: 'endereco+numero+complemento'},
-    { id: 5, CEP: '14781-115', UF: 'SP', CIDADE: 'Barretos', ENDEREÇO: 'endereco+numero+complemento'},
-    { id: 6, CEP: '14781-115', UF: 'SP', CIDADE: 'Barretos', ENDEREÇO: 'endereco+numero+complemento'},
-    { id: 7, CEP: '14781-115', UF: 'SP', CIDADE: 'Barretos', ENDEREÇO: 'endereco+numero+complemento'},
-    { id: 8, CEP: '14781-115', UF: 'SP', CIDADE: 'Barretos', ENDEREÇO: 'endereco+numero+complemento'},
-  ];
 
-  const columns: GridColDef[] = [
-    { field: 'cep',
-      headerName: 'CEP',
-      type: 'string',
-      width: 150,
-      editable: true,
-     },
-      
+  const searchCep = async (cep: string) => {
+    setAwaiting (true);
+    let _buscaCepApi = new BuscaCep();
+    _buscaCepApi.getEnderecoCep(cep).then((value: ICepSearchResult) =>{
+      setAwaiting(false);
+    });
+
+  }
+  
+  const Loading = () => {    
+    const options = {
+      animationData: lottieLoading,
+      loop: true,
+      autoplay: true,
+    };    
+    return <div style={{position: 'absolute', top: '50%', left: '50%', marginRight: '-50%', transform: 'translate(-50%, -50%)'}}> <Lottie {...options}/> </div>;
+};
+
+  const addressInput = () => {
+    return (
+      <FormControl variant="outlined" component="form" onSubmit={() => alert('a')} fullWidth>
+        <Grid container spacing={2}>
+          {cepInput()}    
+          <Grid container item spacing={2}>
+            <Grid item md={2} xs={12}>
+              <TextField id='input-uf' name='input-uf' placeholder='UF' fullWidth></TextField>
+            </Grid>
+            <Grid item md={10} xs={12}>
+              <TextField id='input-cidade' name='input-cidade' placeholder='Cidade' fullWidth></TextField>
+            </Grid>
+          </Grid>
+          <Grid item container>
+            <Grid item md={12} xs={12}>
+              <TextField id='input-bairro' name='input-bairro' placeholder='Bairro' fullWidth></TextField>
+            </Grid>
+          </Grid>
+          <Grid container item spacing={2} xs={12}>
+            <Grid item md={10} xs={12}>
+              <TextField id='input-logradouro' name='input-logradouro' placeholder='Logradouro' fullWidth></TextField>
+            </Grid>
+            <Grid item md={2} xs={12}>
+              <TextField id='input-numero' name='input-numero' placeholder='Número' fullWidth></TextField>
+            </Grid>
+          </Grid>
+          <Grid container item>
+            <Grid item md={12} xs={12}>
+              <TextField id='input-complemento' name='input-complemento' placeholder='Complemento' fullWidth></TextField>
+            </Grid>
+          </Grid>
+          <Grid container item>
+            <Grid item display={'flex'} justifyContent={'center'} alignItems={'center'} md={12} xs={12}>
+              <Grid md={6} xs={12}>
+                <Button type='submit' variant='contained' style={{backgroundColor: '#1C5B76'}} fullWidth>INCLUIR</Button>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
+      </FormControl>
+    );
+  }
+
+  const cepInput = () => {
+    return (
+      <Grid item xs={12}>
+        <TextField
+            id='input-cep' name='input-cep'
+            value={cep}
+            onChange={(e) => setCep(e.target.value)}
+            fullWidth
+            placeholder='CEP'
+            InputProps={{
+            endAdornment: 
+              <IconButton sx={{bgcolor: '#1C5B75', borderRadius: '5px'}} onClick={() => {searchCep(cep)}}>
+                <SearchIcon sx={{color: 'white'}}/>
+              </IconButton>
+            }}
+          />
+      </Grid>
+    );
+  }
+
+  const columns: GridColumns = [
+    { 
+      field: 'cep', 
+      headerName: 'Cep', 
+      flex: 3 
+    },
     {
       field: 'uf',
       headerName: 'UF',
-      type: 'string',
-      width: 90,
-      editable: true,
+      flex: 1,
+      editable: false,
     },
     {
       field: 'cidade',
-      headerName: 'CIDADE',
-      type: 'string',
-      width: 200,
-      editable: true,
+      headerName: 'Cidade',
+      flex: 3,
+      editable: false,
     },
     {
       field: 'endereco',
-      headerName: 'ENDERECO',
-      type: 'string',
-      width: 200,
-      editable: true,
+      headerName: 'Endereço',
+      flex: 4,
+      editable: false,
+      renderCell: (params: GridRenderCellParams<ICepSearchResult>) => {
+        return (
+          <Box sx={{display: 'flex', alignItems: 'center'}}>
+            <Typography sx={{color: '#2430441', fontSize: '13px'}}>
+              {
+                `${params.row.logradouro} - ${params.row.complemento}`
+              }
+            </Typography>
+          </Box>
+        )
+      }
     },
     {
-      field: '',
-      headerName: '',
-      description: 'This column has a value getter and is not sortable.',
-      sortable: false,
-      width: 160,
-      valueGetter: (params: GridValueGetterParams) =>
-        `${params.row.cep || ''} ${params.row.uf || ''}`,
-    },
+      field: 'actions',
+      type: 'actions',
+      headerName: '#',
+      flex: 1,
+      cellClassName: 'actions',
+      getActions: (params: GridRowParams) => {                
+        return [                    
+          <GridActionsCellItem icon={<DeleteOutlineIcon sx={{color: '#900000'}}/>} label="Deletar" onClick={()=> {/*handleDelete(params.row.id)*/}} />          
+        ];
+      },
+    }
   ];
 
-  const addresInput = () => {
-    return(
-      <Grid container direction="column" justifyContent="flex-start" alignItems="stretch"> 
-        <Grid item paddingBottom={1} paddingTop={1}>
-          <TextField
-            fullWidth
-            id="txt_cep"
-            label="CEP"
-            variant="outlined"
-
-            InputProps={{
-             endAdornment: 
-              <IconButton sx={{bgcolor: '#1C5B75', borderRadius: '5px'}}
-              onClick={()=>{
-
-               }}>
-               <SearchIcon sx={{color: 'white'}}/>
-             </IconButton>
-           }}
-          />
-        </Grid>      
-          <Grid container direction="row" paddingBottom={1} columnSpacing={1}> 
-            <Grid item xs={2}> 
-              <TextField id="uf" label="UF" variant="outlined"/>  
-            </Grid>
-            <Grid item xs={10}>
-              <TextField id="cidade" label="CIDADE" variant="outlined" fullWidth/>
-            </Grid>
-          </Grid>          
-
-            <Grid paddingBottom={1}>
-              <TextField id="bairro" label="BAIRRO" variant="outlined" fullWidth/>
-            </Grid>
-
-          <Grid container direction="row" paddingBottom={1} columnSpacing={1}> 
-            <Grid item xs={9}>
-              <TextField id="logradouro" label="LOGRADOURO" variant="outlined" fullWidth/>
-            </Grid>
-            <Grid item xs={3}>
-              <TextField id="numero" label="NUMERO" variant="outlined" fullWidth/>
-            </Grid>
-          </Grid>            
-            
-            <Grid paddingBottom={1}>
-              <TextField id="complemento" label="COMPLEMENTO" variant="outlined" fullWidth/>
-            </Grid>
-      </Grid>    
+  const addressGrid = () => {
+    return (
+      <>
+      <Typography fontSize={'24px'} color={'#4B4B4B'}>Endereços</Typography>
+      <DataGrid
+        rows={addressList}
+        columns={columns}
+        pageSize={25}
+        rowsPerPageOptions={[5, 10, 25]}
+        getRowId={(data) => data.id}
+        rowCount={addressList.length}
+      />
+      </>
     );
-  };
+  }
 
-  const addresList = () => {
-    return(
-      <Grid >
-        <Box>
-          <Grid paddingBottom={1}>
-            <TextField id="outlined-basic" label="ASASDA" variant="outlined" />
-          </Grid>  
-        </Box>
+  const layout = (
+    <Grid container justifyContent={'space-around'} spacing={12}>
+      <Grid item xs={12}/>
+      <Grid item xs={10}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography fontSize={'24px'} color={'#4B4B4B'}>Endereço</Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <Divider />
+          </Grid>
+          <Grid item xs={12}>
+            <Grid container justifyContent={'space-around'}>
+              <Grid item xs={11}>
+                {addressInput()}
+                {addressGrid()}
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
       </Grid>
-    );
-  };
-
-  return (
-    <Grid  container direction="column" xs = {12}  sx={{width : '100%' , padding : 10}}>
-
-      <Grid paddingBottom={1}>
-        Endereço
-      </Grid>
-
-      <Divider></Divider>
-
-      {addresInput()}
-
-      <Grid container direction="column" alignItems="center">
-        <Button variant="contained" size ="small">
-          INCLUIR
-        </Button>
-      </Grid>
-
-      <Grid paddingTop={1} paddingBottom={1}>
-        Endereços
-      </Grid>
-
-      {addresList()}
-
-    <Grid>
-      <Box sx={{ height: 400, width: '100%' }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSize={5}
-          rowsPerPageOptions={[5]}
-          checkboxSelection
-          disableSelectionOnClick
-          experimentalFeatures={{ newEditingApi: true }}
-        />
-      </Box>
-    </Grid>
-
-
     </Grid>
   );
+
+  return (
+    awaiting ? Loading(): layout    
+  )
 }
 
 export default Home
